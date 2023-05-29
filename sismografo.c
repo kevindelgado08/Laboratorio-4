@@ -7,24 +7,105 @@
 
 static void clock_setup (void)
 {
-rcc_clock_setup_pll (&rcc_hse_8mhz_3v3 [RCC_CLOCK_3V3_168MHZ]) ;
-rcc_periph_clock_enable (RCC_GPIOG) ;
-/* Enable GPIOG clock. */
-}
+rcc_clock_setup_pll (&rcc_hse_8mhz_3v3 [RCC_CLOCK_3V3_168MHZ]);
+rcc_periph_clock_enable(RCC_SPI5);
+//Habilitar clock de los puertos para el L3GD20: 
 
-//buscar puertos a utilizar para la pantalla y el giroscopio
+rcc_periph_clock_enable (RCC_GPIOF | RCC_GPIOC | RCC_GPIOA);
+
+//Habilitar clock de los puertos para el LCD SPI: 
+
+rcc_periph_clock_enable (RCC_GPIOD | RCC_GPIOC | RCC_GPIONRST);
+
+//Habilitar clock de los puertos para el USB: 
+
+rcc_periph_clock_enable (RCC_GPIOB | RCC_GPIOC);
+
+//Habilitar clock de los puertos para el LED: 
+
+rcc_periph_clock_enable (RCC_GPIOB | RCC_GPIOC);
+
+//Habilitar clock de los puertos para el USB: 
+
+rcc_periph_clock_enable (RCC_GPIOA | RCC_GPIOC);
+}
 
 static void gpio_setup (void)
 {
-/* Set GPIO13-14 (in GPIO port G) to ’output push-pull’. */
-gpio_mode_setup (GPIOG, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO13|GPIO14) ;
+// GPIO'S Gyroscopio
+
+gpio_mode_setup (GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO1); // Pin para CS
+gpio_mode_setup (GPIOF, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO8); // Pin de MISO
+//gpio_mode_setup (GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO1|GPIO2); Pines para interrupciones
+gpio_mode_setup(GPIOF, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO7 | GPIO9); // PIN SCK y MOSI
+gpio_set_af(GPIOF, GPIO_AF5, GPIO7 | GPIO9);
+
+// GPIO'S LCD
+gpio_mode_setup (GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO2); // Pin para CS
+gpio_mode_setup (GPIOD, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO13); // Pin de MISO
+gpio_mode_setup(GPIOF, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO7 | GPIO9); // PIN SCL y SDI/SDO(MOSI)
+gpio_set_af(GPIOF, GPIO_AF5, GPIO7 | GPIO9); //preguntar si esto va acá o en el main 
 }
 
-static void spi_setup (void)
+// GPIO'S USB
+
+
+//GPIO'S LED
+
+//gpio_mode_setup (GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO5);
+//gpio_mode_setup (GPIOB, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO13);
+gpio_mode_setup (GPIOG, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO13 | GPIO14);
+
+//GPIO'S Pushbuttons
+
+gpio_mode_setup (GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO0);
+//gpio_mode_setup (GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO5); Buscar como escribir el NRST 
+
+
+
+static void spi_gyro_setup (void)
 {
-/* Set GPIO13-14 (in GPIO port G) to ’output push-pull’. */
-gpio_mode_setup (GPIOG, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO13|GPIO14) ;
+//Configuración SPI para giroscopio:
+
+spi_set_master_mode(SPI5);
+spi_set_baudrate_prescaler(SPI5, SPI_CR1_BR_FPCLK_DIV_64);
+spi_set_clock_polarity_0(SPI5);
+spi_set_clock_phase_0(SPI5);
+spi_set_full_duplex_mode(SPI5);
+spi_set_unidirectional_mode(SPI5); 
+spi_set_data_size(SPI5, SPI_CR2_DS_8BIT);
+spi_enable_software_slave_management(SPI5);
+spi_send_msb_first(SPI5);
+spi_set_nss_high(SPI5);
+spi_enable(SPI5);
 }
+
+static void spi_LCD_setup (void)
+{
+//Configuración SPI para LCD:
+
+spi_init_master(SPI5, SPI_CR1_BAUDRATE_FPCLK_DIV_64,
+				SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE,
+				SPI_CR1_CPHA_CLK_TRANSITION_1,
+				SPI_CR1_DFF_8BIT,
+				SPI_CR1_MSBFIRST);
+spi_enable_ss_output(SPI5);
+spi_enable(SPI5);
+}
+
+static void usart_setup (void)
+{
+//Configuración de USART:
+
+
+}
+
+static void usb_setup (void)
+{
+//Configuración de USB:
+
+}
+
 
 int main (void)
 {
@@ -33,14 +114,10 @@ clock_setup();
 gpio_setup();
 gpio_set(GPIOG, GPIO13);
 
-/* Set two LEDs for wigwag effect when toggling. */
-/* Blink the LEDs (PG13 and PG14) on the board. */
 
 while (1) {
 
-/* Toggle LEDs. */
-gpio_toggle (GPIOG, GPIO13|GPIO14);
-
+;
 }
 return 0;
 }
