@@ -34,9 +34,9 @@ rcc_periph_clock_enable (RCC_GPIOA | RCC_GPIOC);
 rcc_periph_clock_enable(RCC_USART1);
 }
 
-
-static void gpio_setup (void)
+static void gyro_setup (void)
 {
+
 // GPIO'S Gyroscopio
 
 gpio_mode_setup (GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO1); // Pin para CS
@@ -45,39 +45,6 @@ gpio_mode_setup (GPIOF, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO8); // Pin de MISO
 gpio_mode_setup(GPIOF, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO7 | GPIO9); // PIN SCK y MOSI
 gpio_set_af(GPIOF, GPIO_AF5, GPIO7 | GPIO9);
 
-// GPIO'S LCD
-gpio_mode_setup (GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO2); // Pin para CS
-gpio_mode_setup (GPIOD, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO13); // Pin de MISO
-gpio_mode_setup(GPIOF, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO7 | GPIO9); // PIN SCL y SDI/SDO(MOSI)
-gpio_set_af(GPIOF, GPIO_AF5, GPIO7 | GPIO9); //preguntar si esto va acá o en el main 
-}
-
-// GPIO'S USB
-
-
-//GPIO'S LED
-
-//gpio_mode_setup (GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO5);
-//gpio_mode_setup (GPIOB, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO13);
-gpio_mode_setup (GPIOG, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO13 | GPIO14);
-
-//GPIO'S Pushbuttons
-
-gpio_mode_setup (GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO0);
-//gpio_mode_setup (GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO5); Buscar como escribir el NRST 
-
-//GPIO'S USART
-
-/* Setup GPIO pins for USART1 transmit. */
-gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO9);
-
-/* Setup USART1 TX pin as alternate function. */
-gpio_set_af(GPIOA, GPIO_AF7, GPIO9);
-
-
-
-static void gyro_setup (void)
-{
 //Configuración SPI para giroscopio:
 
 spi_set_master_mode(SPI5);
@@ -95,6 +62,13 @@ spi_enable(SPI5);
 
 static void LCD_setup (void)
 {
+
+// GPIO'S LCD
+gpio_mode_setup (GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO2); // Pin para CS
+gpio_mode_setup (GPIOD, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO13); // Pin de MISO
+gpio_mode_setup(GPIOF, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO7 | GPIO9); // PIN SCL y SDI/SDO(MOSI)
+gpio_set_af(GPIOF, GPIO_AF5, GPIO7 | GPIO9); //preguntar si esto va acá o en el main 
+
 //Configuración SPI para LCD:
 
 spi_init_master(SPI5, SPI_CR1_BAUDRATE_FPCLK_DIV_64,
@@ -108,6 +82,15 @@ spi_enable(SPI5);
 
 static void usart_setup (void)
 {
+
+//GPIO'S USART
+
+/* Setup GPIO pins for USART1 transmit. */
+gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO9);
+
+/* Setup USART1 TX pin as alternate function. */
+gpio_set_af(GPIOA, GPIO_AF7, GPIO9);
+
 //Configuración de USART:
 
 	usart_set_baudrate(USART1, 115200);
@@ -120,12 +103,37 @@ static void usart_setup (void)
 }
 
 
-static void usb_setup (void)
+static void LED_setup (void)
 {
-//Configuración de USB:
+//GPIO'S LED
+
+//gpio_mode_setup (GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO5);
+//gpio_mode_setup (GPIOB, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO13);
+gpio_mode_setup (GPIOG, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO13 | GPIO14);
+
+//Configuración de LED:
 
 }
 
+static void button_setup (void)
+{
+
+//GPIO'S Pushbuttons
+
+gpio_mode_setup (GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO0);
+//gpio_mode_setup (GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO5); Buscar como escribir el NRST 
+
+
+//Configuración de Pushbuttons:
+
+}
+
+static void usb_setup (void)
+{
+
+//Configuración de USB:
+
+}
 
 int main (void)
 {
