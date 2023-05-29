@@ -28,7 +28,12 @@ rcc_periph_clock_enable (RCC_GPIOB | RCC_GPIOC);
 //Habilitar clock de los puertos para el USB: 
 
 rcc_periph_clock_enable (RCC_GPIOA | RCC_GPIOC);
+
+//Habilitar clock de los puertos para el USART: 
+
+rcc_periph_clock_enable(RCC_USART1);
 }
+
 
 static void gpio_setup (void)
 {
@@ -61,9 +66,17 @@ gpio_mode_setup (GPIOG, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO13 | GPIO14);
 gpio_mode_setup (GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO0);
 //gpio_mode_setup (GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO5); Buscar como escribir el NRST 
 
+//GPIO'S USART
+
+/* Setup GPIO pins for USART1 transmit. */
+gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO9);
+
+/* Setup USART1 TX pin as alternate function. */
+gpio_set_af(GPIOA, GPIO_AF7, GPIO9);
 
 
-static void spi_gyro_setup (void)
+
+static void gyro_setup (void)
 {
 //Configuración SPI para giroscopio:
 
@@ -80,7 +93,7 @@ spi_set_nss_high(SPI5);
 spi_enable(SPI5);
 }
 
-static void spi_LCD_setup (void)
+static void LCD_setup (void)
 {
 //Configuración SPI para LCD:
 
@@ -97,8 +110,15 @@ static void usart_setup (void)
 {
 //Configuración de USART:
 
-
+	usart_set_baudrate(USART1, 115200);
+	usart_set_databits(USART1, 8);
+	usart_set_stopbits(USART1, USART_STOPBITS_1);
+	usart_set_mode(USART1, USART_MODE_TX);
+	usart_set_parity(USART1, USART_PARITY_NONE);
+	usart_set_flow_control(USART1, USART_FLOWCONTROL_NONE);
+	usart_enable(USART1);
 }
+
 
 static void usb_setup (void)
 {
