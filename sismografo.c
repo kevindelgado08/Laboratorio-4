@@ -2,6 +2,8 @@
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/usart.h>
+#include <libopencm3/stm32/lcd-spi.h>
+#include <libopencm3/stm32/lcd-spi.h>
 
 /* Set STM32 to 168 MHz. */
 
@@ -15,7 +17,7 @@ rcc_periph_clock_enable (RCC_GPIOF | RCC_GPIOC | RCC_GPIOA);
 
 //Habilitar clock de los puertos para el LCD SPI: 
 
-rcc_periph_clock_enable (RCC_GPIOD | RCC_GPIOC | RCC_GPIONRST);
+rcc_periph_clock_enable (RCC_GPIOD | RCC_GPIOC);
 
 //Habilitar clock de los puertos para el USB: 
 
@@ -125,13 +127,6 @@ gpio_mode_setup (GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO0);
 
 
 //Configuración de Pushbuttons:
-
-}
-
-static void usb_setup (void)
-{
-
-//Configuración de USB:
 
 }
 
