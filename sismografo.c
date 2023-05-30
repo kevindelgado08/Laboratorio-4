@@ -2,8 +2,8 @@
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/usart.h>
-#include <libopencm3/stm32/lcd-spi.h>
-#include <libopencm3/stm32/lcd-spi.h>
+#include <libopencm3/stm32/spi.h>
+
 
 /* Set STM32 to 168 MHz. */
 
@@ -55,7 +55,7 @@ spi_set_clock_polarity_0(SPI5);
 spi_set_clock_phase_0(SPI5);
 spi_set_full_duplex_mode(SPI5);
 spi_set_unidirectional_mode(SPI5); 
-spi_set_data_size(SPI5, SPI_CR2_DS_8BIT);
+//spi_set_data_size(SPI5, SPI_CR1_DFF_8BIT);
 spi_enable_software_slave_management(SPI5);
 spi_send_msb_first(SPI5);
 spi_set_nss_high(SPI5);
@@ -112,7 +112,7 @@ static void LED_setup (void)
 //gpio_mode_setup (GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO5);
 //gpio_mode_setup (GPIOB, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO13);
 gpio_mode_setup (GPIOG, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO13 | GPIO14);
-
+gpio_set(GPIOG, GPIO13);
 //Configuración de LED:
 
 }
@@ -123,8 +123,6 @@ static void button_setup (void)
 //GPIO'S Pushbuttons
 
 gpio_mode_setup (GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO0);
-//gpio_mode_setup (GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO5); Buscar como escribir el NRST 
-
 
 //Configuración de Pushbuttons:
 
@@ -132,11 +130,13 @@ gpio_mode_setup (GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO0);
 
 int main (void)
 {
-int i;
 clock_setup();
-gpio_setup();
-gpio_set(GPIOG, GPIO13);
 
+gyro_setup();
+button_setup();
+LED_setup();
+usart_setup();
+LCD_setup();
 
 while (1) {
 
