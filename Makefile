@@ -1,7 +1,6 @@
 CFLAGS = -DTEST
-OBJS = clock.o console.o
-
-BINARY = spi-mems
+OBJS = clock.o
+BINARY = sismografo
 
 LDSCRIPT = ../stm32f429i-discovery.ld
 
