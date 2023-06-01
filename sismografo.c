@@ -3,48 +3,11 @@
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/usart.h>
 #include <libopencm3/stm32/spi.h>
-#include "gfx.h"
-#include "lcd-spi.h"
+#include "gfx.c"
+#include "lcd-spi.c"
+#include "sdram.c"
 #include "clock.h"
 #include <stdint.h>
-
-void console_putc(char c);
-char console_getc(int wait);
-void console_puts(char *s);
-int console_gets(char *s, int len);
-
-static void clock_setup_enable (void)
-{
-rcc_clock_setup_pll (&rcc_hse_8mhz_3v3 [RCC_CLOCK_3V3_168MHZ]);
-rcc_periph_clock_enable(RCC_SPI5);
-//Habilitar clock de los puertos para el L3GD20: 
-
-rcc_periph_clock_enable (RCC_GPIOF | RCC_GPIOC | RCC_GPIOA);
-
-//Habilitar clock de los puertos para el LCD SPI: 
-
-rcc_periph_clock_enable (RCC_GPIOD | RCC_GPIOC);
-
-//Habilitar clock de los puertos para el USB: 
-
-rcc_periph_clock_enable (RCC_GPIOB | RCC_GPIOC);
-
-//Habilitar clock de los puertos para el LED: 
-
-rcc_periph_clock_enable (RCC_GPIOB | RCC_GPIOC);
-
-//Habilitar clock de los puertos para el USB: 
-
-rcc_periph_clock_enable (RCC_GPIOA | RCC_GPIOC);
-
-//Habilitar clock de los puertos para el USART: 
-
-rcc_periph_clock_enable(RCC_GPIOA);
-rcc_periph_clock_enable(RCC_USART1);
-}
-
-static void gyro_setup (void)
-{
 
 #define GYR_RNW			(1 << 7) /* Write when zero */
 #define GYR_MNS			(1 << 6) /* Multiple reads when 1 */
@@ -65,7 +28,43 @@ static void gyro_setup (void)
 #define GYR_OUT_Y_H		0x2B
 #define GYR_OUT_Z_L		0x2C
 #define GYR_OUT_Z_H		0x2D
+#define CONSOLE_UART	USART1
 
+static void clock_setup_enable (void)
+{
+rcc_clock_setup_pll (&rcc_hse_8mhz_3v3 [RCC_CLOCK_3V3_84MHZ]);
+rcc_periph_clock_enable(RCC_SPI5);
+//Habilitar clock de los puertos para el L3GD20: 
+
+rcc_periph_clock_enable (RCC_GPIOF);
+rcc_periph_clock_enable (RCC_GPIOA);
+rcc_periph_clock_enable (RCC_GPIOC);
+//Habilitar clock de los puertos para el LCD SPI: 
+
+rcc_periph_clock_enable (RCC_GPIOD);
+rcc_periph_clock_enable (RCC_GPIOC);
+//Habilitar clock de los puertos para el USB: 
+
+rcc_periph_clock_enable (RCC_GPIOB);
+rcc_periph_clock_enable (RCC_GPIOC);
+
+//Habilitar clock de los puertos para el LED: 
+
+rcc_periph_clock_enable (RCC_GPIOB);
+rcc_periph_clock_enable (RCC_GPIOC);
+//Habilitar clock de los puertos para el USB: 
+
+rcc_periph_clock_enable (RCC_GPIOC);
+rcc_periph_clock_enable (RCC_GPIOA);
+
+//Habilitar clock de los puertos para el USART: 
+
+rcc_periph_clock_enable(RCC_GPIOA);
+rcc_periph_clock_enable(RCC_USART1);
+}
+
+static void gyro_setup (void)
+{
 
 
 // GPIO'S Gyroscopio
@@ -79,12 +78,12 @@ gpio_set_output_options(GPIOF, GPIO_OTYPE_PP, GPIO_OSPEED_25MHZ, GPIO7 | GPIO9);
 //Configuración SPI para giroscopio:
 
 spi_set_master_mode(SPI5);
-spi_set_baudrate_prescaler(SPI5, SPI_CR1_BR_FPCLK_DIV_128);
+spi_set_baudrate_prescaler(SPI5, SPI_CR1_BR_FPCLK_DIV_256);
 spi_set_clock_polarity_0(SPI5);
 spi_set_clock_phase_0(SPI5);
 spi_set_full_duplex_mode(SPI5);
 spi_set_unidirectional_mode(SPI5); 
-//spi_set_data_size(SPI5, SPI_CR1_DFF_8BIT);
+spi_set_dff_8bit(SPI5);
 spi_enable_software_slave_management(SPI5);
 spi_enable_ss_output(SPI1);
 spi_send_msb_first(SPI5);
@@ -110,12 +109,13 @@ spi_init_master(SPI5, SPI_CR1_BAUDRATE_FPCLK_DIV_64,
 				SPI_CR1_MSBFIRST);
 spi_enable_ss_output(SPI5);
 spi_enable(SPI5);
-//lcd_enable(SPI5);
 }
+
+
 
 static void usart_setup (void)
 {
-#define CONSOLE_UART	USART1
+
 
 rcc_periph_clock_enable(RCC_GPIOA);
 rcc_periph_clock_enable(RCC_USART1);
@@ -225,41 +225,31 @@ int console_gets(char *s, int len)
 static void LED_setup (void)
 {
 //GPIO'S LED
-
-//gpio_mode_setup (GPIOC, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO5);
-//gpio_mode_setup (GPIOB, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO13);
 gpio_mode_setup (GPIOG, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO13 | GPIO14);
-gpio_set(GPIOG, GPIO13);
-//Configuración de LED:
 
 }
 
 static void button_setup (void)
 {
-
 //GPIO'S Pushbuttons
-
 gpio_mode_setup (GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO0);
-
-//Configuración de Pushbuttons:
-
 }
 
 int main (void)
 {
-int16_t gyr_x;
-char buf[128];
-int	len;
-uint8_t temp;
+int8_t gyr_x, gyr_y, gyr_z;
+
 clock_setup();
+sdram_init();
 clock_setup_enable();
 usart_setup();
 gyro_setup();
-//button_setup();
-//LED_setup();
+button_setup();
+LED_setup();
+lcd_spi_init();
+LCD_setup();
 
-//LCD_setup();
-
+//Configuración inicial del giroscopio: 
 gpio_clear(GPIOC, GPIO1);
 spi_send(SPI5, GYR_CTRL_REG1);
 spi_read(SPI5);
@@ -268,7 +258,6 @@ spi_send(SPI5, GYR_CTRL_REG1_PD | GYR_CTRL_REG1_XEN |
 		(3 << GYR_CTRL_REG1_BW_SHIFT));
 spi_read(SPI5);
 gpio_set(GPIOC, GPIO1);
-
 gpio_clear(GPIOC, GPIO1);
 spi_send(SPI5, GYR_CTRL_REG4);
 spi_read(SPI5);
@@ -276,53 +265,80 @@ spi_send(SPI5, (1 << GYR_CTRL_REG4_FS_SHIFT));
 spi_read(SPI5);
 gpio_set(GPIOC, GPIO1);
 
+console_puts(" \n");
+console_puts("Dispositivo habilitado: \n");
+
+//Configuración inicial de la pantalla:
+gfx_init(lcd_draw_pixel, 240, 320);
+gfx_fillScreen(LCD_GREY);
+gfx_fillRoundRect(10, 10, 220, 220, 5, LCD_WHITE);
+gfx_drawRoundRect(10, 10, 220, 220, 5, LCD_RED);
+gfx_setTextSize(2);
+gfx_setCursor(15, 25);
+gfx_puts("Sismografo");
+gfx_setTextSize(0.9);
+gfx_setCursor(15, 60);
+gfx_puts("Ejes x, y, z:");
+gfx_setCursor(15, 80);
+console_puts("Coordenadas: ");
+lcd_show_frame();
+	
 while (1) {
 
-// Configuración del giroscopio: 
+	//Configuración de Pantalla Principal: 
 
+	gfx_fillScreen(LCD_GREY);
+	gfx_fillRoundRect(10, 10, 220, 220, 5, LCD_WHITE);
+	gfx_drawRoundRect(10, 10, 220, 220, 5, LCD_RED);
+	gfx_setCursor(145, 18.5);
+	gfx_puts("100 %");
+	gfx_fillRoundRect(190, 15, 30, 15, 4, LCD_GREEN); //Bateria
+	//falta un if para mostrar cuando se descarga la bateria
+	gfx_drawRoundRect(190, 15, 30, 15, 4, LCD_BLACK);
+	gfx_drawRect(220, 18.9, 2, 7, LCD_BLACK);
+	gfx_setTextSize(2);
+	gfx_setCursor(15, 40);
+	gfx_puts("Coordenadas:");
+	gfx_setTextSize(0.9);
+		
+// Configuración del giroscopio: 
 	gpio_clear(GPIOC, GPIO1);
-	spi_send(SPI5, GYR_WHO_AM_I | GYR_RNW);
-	temp = spi_read(SPI5);
-	//my_usart_print_int(CONSOLE_UART, GYR_WHO_AM_I);
+	spi_send(SPI5, GYR_WHO_AM_I);
+	spi_read(SPI5);
 	spi_send(SPI5, 0);
-	temp=spi_read(SPI5);
-	//my_usart_print_int(CONSOLE_UART, (temp));
 	gpio_set(GPIOC, GPIO1);
 
 	gpio_clear(GPIOC, GPIO1);
 	spi_send(SPI5, GYR_STATUS_REG | GYR_RNW);
 	spi_read(SPI5);
 	spi_send(SPI5, 0);
-	//temp=spi_read(SPI5);
-	//my_usart_print_int(USART2, (temp));
 	gpio_set(GPIOC, GPIO1);
 
-	gpio_clear(GPIOC, GPIO1);
-	spi_send(SPI5, GYR_OUT_TEMP | GYR_RNW);
-	spi_read(SPI5);
-	spi_send(SPI5, 0);
-	//temp=spi_read(SPI5);
-	
-	//my_usart_print_int(USART2, (temp));
-	gpio_set(GPIOC, GPIO1);
-
+	//Eje x:
 	gpio_clear(GPIOC, GPIO1);
 	spi_send(SPI5, GYR_OUT_X_L | GYR_RNW);
 	spi_read(SPI5);
 	spi_send(SPI5, 0);
 	gyr_x=spi_read(SPI5);
 	gpio_set(GPIOC, GPIO1);
+
 	gpio_clear(GPIOC, GPIO1);
 	spi_send(SPI5, GYR_OUT_X_H | GYR_RNW);
 	spi_read(SPI5);
 	spi_send(SPI5, 0);
-	my_usart_print_int(CONSOLE_UART, GYR_OUT_X_H);
 	gyr_x|= spi_read(SPI5) << 8;
+	gfx_setTextSize(1);
+	gfx_setCursor(15, 80);
+	gfx_puts("Eje x: ");
+	gfx_puts(gyr_x);
 	gpio_set(GPIOC, GPIO1);
-	int i;
-		for (i = 0; i < 80000; i++)    /* Wait a bit. */
-			__asm__("nop");
-		
+
+
+	
+	gpio_set(GPIOC, GPIO1);
+	
+	msleep(1000);
+	lcd_show_frame();
 }
 
 return 0;
