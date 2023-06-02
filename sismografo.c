@@ -370,7 +370,28 @@ while (1) {
 	gfx_setTextSize(1.5);
 	gfx_setCursor(15, 140);
 	gfx_puts("Comunicacion: ");
-	
+
+	//Funcionamiento de botones y habilitación de USART: 
+	if (gpio_get(GPIOA, GPIO0)){
+		gfx_puts("ON");
+		gpio_set(GPIOG, GPIO13);
+		gpio_clear(GPIOG, GPIO14);
+		console_puts(" \n");
+		console_puts("Enviando información: \n");
+		console_puts("Eje x: ");
+		my_usart_print_int(CONSOLE_UART, gyr_x);
+		console_puts("Eje y: ");
+		my_usart_print_int(CONSOLE_UART, gyr_y);
+		console_puts("Eje z: ");
+		my_usart_print_int(CONSOLE_UART, gyr_z);
+		console_puts(" ");
+	}	
+	else 
+	{	
+		gfx_puts("OFF");
+		gpio_set(GPIOG, GPIO14);
+		gpio_clear(GPIOG, GPIO13);
+	}
 	gpio_set(GPIOC, GPIO1);
 	
 	msleep(1000);
