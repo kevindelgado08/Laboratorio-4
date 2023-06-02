@@ -333,7 +333,23 @@ while (1) {
 	gfx_puts(gyr_x);
 	gpio_set(GPIOC, GPIO1);
 
+	//Eje y:
+	gpio_clear(GPIOC, GPIO1);
+	spi_send(SPI5, GYR_OUT_Y_L | GYR_RNW);
+	spi_read(SPI5);
+	spi_send(SPI5, 0);
+	gyr_y=spi_read(SPI5);
+	gpio_set(GPIOC, GPIO1);
 
+	gpio_clear(GPIOC, GPIO1);
+	spi_send(SPI5, GYR_OUT_Y_H | GYR_RNW);
+	spi_read(SPI5);
+	spi_send(SPI5, 0);
+	gyr_y|= spi_read(SPI5) << 8;
+	gfx_setCursor(15, 100);
+	gfx_puts("Eje y: ");
+	gfx_puts(gyr_y);
+	gpio_set(GPIOC, GPIO1);
 	
 	gpio_set(GPIOC, GPIO1);
 	
