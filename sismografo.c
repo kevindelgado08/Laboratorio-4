@@ -351,6 +351,26 @@ while (1) {
 	gfx_puts(gyr_y);
 	gpio_set(GPIOC, GPIO1);
 	
+	//Eje z:
+	gpio_clear(GPIOC, GPIO1);
+	spi_send(SPI5, GYR_OUT_Z_L | GYR_RNW);
+	spi_read(SPI5);
+	spi_send(SPI5, 0);
+	gyr_z=spi_read(SPI5);
+	gpio_set(GPIOC, GPIO1);
+
+	gpio_clear(GPIOC, GPIO1);
+	spi_send(SPI5, GYR_OUT_Z_H | GYR_RNW);
+	spi_read(SPI5);
+	spi_send(SPI5, 0);
+	gyr_z|= spi_read(SPI5) << 8;
+	gfx_setCursor(15, 120);
+	gfx_puts("Eje z: ");
+	gfx_puts(gyr_z);
+	gfx_setTextSize(1.5);
+	gfx_setCursor(15, 140);
+	gfx_puts("Comunicacion: ");
+	
 	gpio_set(GPIOC, GPIO1);
 	
 	msleep(1000);
