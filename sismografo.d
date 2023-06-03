@@ -42,4 +42,9 @@ sismografo.o: sismografo.c \
  clock.h sdram.h lcd-spi.h sdram.c \
  ../../../../../libopencm3//include/libopencm3/stm32/fsmc.h \
  ../../../../../libopencm3//include/libopencm3/stm32/f4/fmc.h \
- ../../../../../libopencm3//include/libopencm3/stm32/common/fmc_common_f47.h
+ ../../../../../libopencm3//include/libopencm3/stm32/common/fmc_common_f47.h \
+ /usr/include/newlib/stdio.h \
+ /usr/lib/gcc/arm-none-eabi/10.3.1/include/stdarg.h \
+ /usr/include/newlib/sys/types.h /usr/include/newlib/sys/_stdint.h \
+ /usr/include/newlib/sys/_pthreadtypes.h \
+ /usr/include/newlib/machine/types.h /usr/include/newlib/sys/stdio.h

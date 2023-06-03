@@ -203,7 +203,7 @@ initialize_display(const struct tft_command cmds[])
 	while (cmds[i].cmd) {
 		console_puts("CMD: ");
 		print_hex(cmds[i].cmd);
-		console_puts(", ");
+		console_puts(" ");
 		if (cmds[i].n_args) {
 			console_puts("ARGS: ");
 			for (j = 0; j < cmds[i].n_args; j++) {
